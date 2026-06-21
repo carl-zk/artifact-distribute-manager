@@ -1,27 +1,18 @@
 import { defineStore } from "pinia";
+import { ref, type Ref } from "vue";
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
-        user: null as { name: string } | null,
-        token: null as string | null,
+        isAuthenticated: false as boolean
     }),
-    getters: {
-        isAuthenticated: (state) => !!state.user && !!state.token,
-    },
     actions: {
-        login(username: string, password: string) {
-            if (!username || !password) {
-                throw new Error("Username and password are required.");
-            }
+        login() {
+            this.isAuthenticated = true;
+        },
 
-            // This is a stubbed login flow for the login portal.
-            // Replace with real authentication logic when backend integration is available.
-            this.user = { name: username };
-            this.token = "demo-token";
-        },
         logout() {
-            this.user = null;
-            this.token = null;
-        },
-    },
+            this.isAuthenticated = false;
+        }
+    }
 });
+

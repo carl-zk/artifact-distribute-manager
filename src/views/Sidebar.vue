@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import { ref } from "vue";
-import { House, Gauge, FolderUp, CloudBackup, ListCheck } from "lucide-vue-next";
 import { BIconHouseDoor, BIconFolderPlus, BIconCloudArrowUp } from "bootstrap-icons-vue";
 
 const route = useRoute();
@@ -47,7 +46,7 @@ function toggleCollapse() {
             <li class="nav-item" v-for="page in pages" :key="page.key">
                 <a href="#" :class="['nav-link', route.path === page.path ? 'active' : 'text-white']"
                     @click.prevent="navigate(page.path)" :aria-current="route.path === page.path ? 'page' : undefined">
-                    <component :is="page.icon" :size="16" class="me-2" />
+                    <component :is="page.icon" class="menu-icon me-2" />
                     <span class="nav-label">{{ page.key }}</span>
                 </a>
             </li>
@@ -65,18 +64,45 @@ function toggleCollapse() {
 }
 
 .sidebar.collapsed {
-    width: 34px;
+    width: 60px;
+}
+
+.sidebar.collapsed .nav-label {
+    display: none;
+}
+
+.sidebar.collapsed .nav-link {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.sidebar.collapsed .nav-item {
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar.collapsed>a {
+    justify-content: center;
+    margin-right: 0 !important;
+    width: 100%;
+}
+
+.sidebar.collapsed>a .me-1 {
+    margin-right: 0 !important;
+}
+
+.sidebar.collapsed .nav-link .me-2 {
+    margin-right: 0 !important;
 }
 
 .sidebar .nav-label {
     vertical-align: middle;
 }
 
-.sidebar.collapsed .nav-label {
-    display: flex;
-    justify-content: center;
-    padding: 1.5rem;
-}
 
 .sidebar.collapsed .fs-5 {
     display: none
@@ -109,14 +135,7 @@ function toggleCollapse() {
     transform: rotate(180deg);
 }
 
-/* When sidebar is collapsed, show only icons */
-.sidebar.collapsed .nav-link {
-    padding: 0.5rem;
-    display: none;
-    justify-content: center;
-}
-
-.sidebar.collapsed .nav-link svg {
-    margin: 0 !important;
+.menu-icon {
+    font-size: 18px;
 }
 </style>

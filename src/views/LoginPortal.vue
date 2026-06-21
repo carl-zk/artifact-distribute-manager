@@ -16,7 +16,8 @@ async function submitLogin() {
     isSubmitting.value = true;
 
     try {
-        authStore.login(username.value.trim(), password.value);
+        //authStore.login(username.value.trim(), password.value);
+        authStore.login()
         await router.push({ name: "Upload" });
     } catch (error) {
         errorMessage.value = error instanceof Error ? error.message : String(error);
