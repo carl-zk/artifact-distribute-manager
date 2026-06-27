@@ -43,18 +43,18 @@ function handleSelection(items: Agent[]) {
             v-model="searchTerm" />
         </div>
         <div v-if="!filteredAgentGroups.length" class="text-muted mb-3">No agents match your search.</div>
-        <div v-for="{ env, agents } in filteredAgentGroups" :key="env" class="accordion"
+        <div v-for="({ env, agents }, index) in filteredAgentGroups" :key="env" class="accordion"
           :id="`agentGroups-${sanitizeId(env)}`">
           <div class="accordion-item">
             <h2 class="accordion-header" :id="`${sanitizeId(env)}Heading`">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                :data-bs-target="`#agentCluster-${sanitizeId(env)}`" aria-expanded="true"
-                :aria-controls="`agentCluster-${sanitizeId(env)}`">
+              <button class="accordion-button" :class="{ collapsed: index !== 0 }" type="button"
+                data-bs-toggle="collapse" :data-bs-target="`#agentCluster-${sanitizeId(env)}`"
+                :aria-expanded="index === 0" :aria-controls="`agentCluster-${sanitizeId(env)}`">
                 {{ env }}
               </button>
             </h2>
-            <div :id="`agentCluster-${sanitizeId(env)}`" class="accordion-collapse collapse show"
-              :aria-labelledby="`${sanitizeId(env)}Heading`">
+            <div :id="`agentCluster-${sanitizeId(env)}`" class="accordion-collapse collapse"
+              :class="{ show: index === 0 }" :aria-labelledby="`${sanitizeId(env)}Heading`">
               <div class="accordion-body">
                 <AgentTable :visible="visible" :agents="agents" @selectionChange="handleSelection" />
               </div>

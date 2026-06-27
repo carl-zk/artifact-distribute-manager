@@ -10,6 +10,10 @@ const routers: RouteRecordRaw[] = [
         component: GuestLayout,
         children: [
             {
+                path: "/",
+                redirect: "login"
+            },
+            {
                 path: "login",
                 name: "Login",
                 component: () => import("@/views/LoginPortal.vue"),

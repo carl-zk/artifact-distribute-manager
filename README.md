@@ -75,6 +75,29 @@ Type-check the project:
 npm run type-check
 ```
 
+## Deploy
+
+
+```sh
+docker build -t artifact-ui:latest .
+
+minikube image load artifact-ui
+
+kubectl apply -f deploy.yaml
+kubectl apply -f service.yaml
+kubectl apply -f ingress.yaml
+```
+
+`<minikube-ip>:30081/`
+
+## Rolling out
+```sh
+eval $(minikube docker-env)
+docker build -t artifact-ui:latest .
+kubectl rollout restart deployment artifact-ui
+```
+it avoid 'minikube image load xx' option.
+
 ## Notes
 
 - This project is configured for modern Node versions: `^20.19.0 || >=22.12.0`.

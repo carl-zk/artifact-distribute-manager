@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: artifact-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: artifact-ui
+  template:
+    metadata:
+      labels:
+        app: artifact-ui
+    spec:
+      containers:
+        - name: artifact-ui
+          image: artifact-ui:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
