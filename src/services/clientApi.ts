@@ -123,3 +123,38 @@ export async function startTasks(taskIds: number[]): Promise<void> {
     throw new Error(`Failed to start tasks: ${response.status} ${response.statusText}`)
   }
 }
+
+/// terminal
+export type SessionStatus =
+  | "CREATED"
+  | "OPEN"
+  | "DISCONNECTED"
+  | "CLOSED";
+
+export interface TerminalSession {
+  sessionId?: string;
+
+  targetType: "SERVER" | "AGENT";
+
+  targetId?: string;
+
+  status?: SessionStatus;
+
+  createdAt?: string; // ISO-8601 UTC string
+}
+
+export async function openTerminalSession(reqs: TerminalSession[]): Promise<TerminalSession[]> {
+  const response = await fetch("/api/admin/terminal/sessions", {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(reqs)
+  })
+
+  if (!response.ok) {
+    throw new Error('failed open terminal session')
+  }
+  const sessions: TerminalSession[] = await response.json()
+  return sessions
+}

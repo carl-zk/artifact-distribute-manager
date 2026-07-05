@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import { ref } from "vue";
-import { BIconHouseDoor, BIconFolderPlus, BIconCloudArrowUp } from "bootstrap-icons-vue";
+import { BIconHouseDoor, BIconFolderPlus, BIconCloudArrowUp, BIconOctagon } from "bootstrap-icons-vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -9,6 +9,7 @@ const router = useRouter();
 const pages = [
     { key: "Upload", path: "/upload", icon: BIconFolderPlus },
     { key: "Deliver", path: "/tasks", icon: BIconCloudArrowUp },
+    { key: "Terminal", path: "/terminal", icon: BIconOctagon }
 ];
 
 function navigate(path: string) {

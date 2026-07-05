@@ -46,6 +46,11 @@ const routers: RouteRecordRaw[] = [
                     { path: "b", redirect: "/tasks/pageb" },
                 ],
             },
+            {
+                path: "terminal",
+                name: "TerminalPlane",
+                component: () => import("@/views/TerminalPlane.vue")
+            }
         ]
     }
 ];
