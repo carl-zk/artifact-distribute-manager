@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
-import { useTerminalWS } from '@/composables/useWS';
+import { useTerminal } from '@/composables/useTerminal';
 import 'xterm/css/xterm.css'
 
 
-const { container, open } = useTerminalWS()
+const { container, open } = useTerminal()
 
 onMounted(async () => {
     await open({
