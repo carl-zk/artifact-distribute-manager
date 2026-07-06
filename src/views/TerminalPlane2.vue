@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch, type ComponentPublicInstance } from 'vue'
+import { computed, nextTick, onMounted, ref, watch, type ComponentPublicInstance } from 'vue'
 import { useTerminalWorkspace } from '@/composables/useTerminalWorkspace'
 import 'xterm/css/xterm.css'
 
@@ -17,26 +17,35 @@ function sendBroadcast() {
   })
 }
 
-function setTerminalEl(tabId: string, el: Element | ComponentPublicInstance | null) {
-  if (!el || !(el instanceof HTMLDivElement)) return
+function setTerminalEl(tabId: any, el: Element | ComponentPublicInstance | null) {
+  console.log('ref', tabId, el)
+
+  if (!tabId || !el || !(el instanceof HTMLDivElement)) return
 
   const tab = workspace.getTab(tabId)
-  if (!tab || tab.terminal?.getSessionId?.()) return
+
+  if (!tab) return
 
   console.log('setTerminalEl ', tabId, el)
-
   tab.el = el
 
   // delay ensures Vue finished patching + xterm safe mount
   requestAnimationFrame(() => {
-    // ensure visible before open
-    if (el.offsetWidth === 0 || el.offsetHeight === 0) {
-      console.warn('terminal not visible yet', tabId)
-      return
-    }
+    requestAnimationFrame(() => {
+      // ensure visible before open
+      if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+        console.warn('terminal not visible yet', tabId)
+        return
+      }
 
-    if (tab.terminal.getSessionId?.()) return
-    tab.terminal.open({ targetType: 'SERVER' }, el)
+      // if (!tab.terminal.getSessionId()) return
+      if (!tab.terminal.opened) {
+        tab.terminal.open({ targetType: 'SERVER' }, el)
+        tab.terminal.opened = true
+      }
+      tab.terminal.resize()
+      console.log('try open terminal for tab ', tabId)
+    })
   })
 }
 
@@ -45,13 +54,9 @@ async function addTerminal() {
 
   workspace.activeId.value = tab.id
 
+  console.log('create tab ', tab.id)
+
   await nextTick()
-  /*
-  const el = tab.el
-  if (el) {
-    //  tab.terminal.open({ targetType: 'SERVER' }, el)
-  }
-    */
 }
 </script>
 
@@ -81,12 +86,13 @@ async function addTerminal() {
 
     <!-- TERMINAL AREA -->
     <div class="terminal-area">
-      <div v-for="tab in workspace.tabs.value" :key="tab.id" class="terminal-pane">
-        <div
-          :style="{ display: workspace.activeId.value === tab.id ? 'block' : 'none' }"
-          :key="tab.id"
-          class="terminal-host"
-        >
+      <div
+        v-for="tab in workspace.tabs.value"
+        :key="tab.id"
+        class="terminal-pane"
+        :style="{ display: workspace.activeId.value === tab.id ? 'block' : 'none' }"
+      >
+        <div class="terminal-host">
           <div :ref="el => setTerminalEl(tab.id, el)" class="terminal-node"></div>
         </div>
       </div>
