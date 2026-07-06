@@ -45,7 +45,7 @@ const routers: RouteRecordRaw[] = [
       {
         path: 'terminal',
         name: 'TerminalPlane',
-        component: () => import('@/views/TerminalPlane2.vue')
+        component: () => import('@/views/TerminalPlane.vue')
       }
     ]
   }
@@ -66,7 +66,6 @@ router.beforeEach(to => {
     console.log(`Redirecting ${to.path} → /login`)
     return '/login'
   }
-  console.log('to next' + to.fullPath)
 
   return true
 })

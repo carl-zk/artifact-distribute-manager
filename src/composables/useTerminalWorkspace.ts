@@ -6,14 +6,12 @@ export interface TerminalTab {
   id: string
   title: string
   el?: HTMLDivElement | null
-  mounted: boolean
   terminal: {
     open: (req: TerminalSession, el: HTMLDivElement) => Promise<void>
     resize: () => void
     destroy: () => void
     getSessionId: () => string | null
     send: (msg: string) => void
-    opened: boolean
   }
 }
 
@@ -21,6 +19,7 @@ export function useTerminalWorkspace() {
   const tabs = ref<TerminalTab[]>([])
   const activeId = ref<string | null>(null)
   const activeTab = computed(() => tabs.value.find(t => t.id === activeId.value))
+  let nextTabNo = 0
 
   async function addTerminal() {
     const terminal = useTerminal()
@@ -28,8 +27,7 @@ export function useTerminalWorkspace() {
 
     const tab: TerminalTab = {
       id,
-      title: `Server-${tabs.value.length + 1}`,
-      mounted: false,
+      title: `Server-${++nextTabNo}`,
       terminal
     }
 
@@ -45,12 +43,16 @@ export function useTerminalWorkspace() {
     tabs.value.splice(index, 1)
 
     if (activeId.value === id) {
-      activeId.value = tabs.value[0]?.id || ''
+      activeId.value = tabs.value[Math.min(index, tabs.value.length - 1)]?.id ?? null
     }
   }
 
   function getTab(id: string): TerminalTab | undefined {
     return tabs.value.find(t => t.id === id)
+  }
+
+  function destroy() {
+    tabs.value.forEach(tab => tab.terminal.destroy())
   }
 
   return {
@@ -59,6 +61,7 @@ export function useTerminalWorkspace() {
     activeTab,
     addTerminal,
     closeTab,
-    getTab
+    getTab,
+    destroy
   }
 }

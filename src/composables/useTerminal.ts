@@ -13,16 +13,12 @@ export function useTerminal() {
   let term: Terminal | null = null
   let fit: FitAddon | null = null
   let ws: WSClient | null = null
-  let opened: boolean = false
 
   async function open(req: TerminalSession, el: HTMLDivElement) {
-    console.log('[open] container is ', container.value, el)
     container.value = el
     const sessions = await openTerminalSession([req])
 
     sessionId.value = sessions[0]?.sessionId!
-
-    console.log('[open] session id is ', sessionId.value)
 
     await nextTick()
     requestAnimationFrame(() => {
@@ -97,7 +93,6 @@ export function useTerminal() {
     fit = null
     sessionId.value = null
     container.value = null
-    opened = false
   }
 
   function getSessionId() {
@@ -117,7 +112,6 @@ export function useTerminal() {
     resize,
     getSessionId,
     send,
-    destroy,
-    opened
+    destroy
   }
 }
