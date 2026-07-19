@@ -1,6 +1,6 @@
-import type { Agent } from "@/types/Agent"
-import type { FileEntry } from "@/types/FileEntity"
-import type { Task } from "@/types/Task"
+import type { Agent } from '@/types/Agent'
+import type { FileEntry } from '@/types/FileEntity'
+import type { Task } from '@/types/Task'
 
 export type UploadResult = {
   ok: boolean
@@ -12,11 +12,11 @@ export type UploadResult = {
 
 export async function uploadFiles(files: File[]): Promise<UploadResult> {
   const formData = new FormData()
-  files.forEach((file) => formData.append('files', file, file.name))
+  files.forEach(file => formData.append('files', file, file.name))
 
   const response = await fetch('/api/files/upload', {
     method: 'POST',
-    body: formData,
+    body: formData
   })
 
   if (!response.ok) {
@@ -26,7 +26,7 @@ export async function uploadFiles(files: File[]): Promise<UploadResult> {
       status: response.status,
       statusText: response.statusText,
       body: text,
-      error: `Upload failed: ${response.status} ${response.statusText} ${text}`,
+      error: `Upload failed: ${response.status} ${response.statusText} ${text}`
     }
   }
 
@@ -41,13 +41,13 @@ export async function uploadFiles(files: File[]): Promise<UploadResult> {
     ok: true,
     status: response.status,
     statusText: response.statusText,
-    body,
+    body
   }
 }
 
 export async function fetchFiles(): Promise<FileEntry[]> {
   const response = await fetch('/api/files', {
-    method: 'GET',
+    method: 'GET'
   })
 
   if (!response.ok) {
@@ -63,13 +63,13 @@ function toFileEntry(data: any): FileEntry {
     id: Number(data.id),
     name: data.fileName,
     size: Number(data.fileSize),
-    sha256: data.sha256,
+    sha256: data.sha256
   }
 }
 
 export async function fetchAgents(): Promise<Agent[]> {
   const response = await fetch('/api/admin/agents', {
-    method: 'GET',
+    method: 'GET'
   })
 
   if (!response.ok) {
@@ -80,13 +80,13 @@ export async function fetchAgents(): Promise<Agent[]> {
   return agents
 }
 
-export async function createTasks(tasks: Omit<Task, "id">[]): Promise<Task[]> {
+export async function createTasks(tasks: Omit<Task, 'id'>[]): Promise<Task[]> {
   const response = await fetch('/api/admin/tasks', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(tasks),
+    body: JSON.stringify(tasks)
   })
 
   if (!response.ok) {
@@ -99,7 +99,7 @@ export async function createTasks(tasks: Omit<Task, "id">[]): Promise<Task[]> {
 
 export async function fetchTasks(): Promise<Task[]> {
   const response = await fetch('/api/admin/tasks', {
-    method: 'GET',
+    method: 'GET'
   })
 
   if (!response.ok) {
@@ -114,47 +114,12 @@ export async function startTasks(taskIds: number[]): Promise<void> {
   const response = await fetch('/api/admin/tasks/start', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(taskIds),
+    body: JSON.stringify(taskIds)
   })
 
   if (!response.ok) {
     throw new Error(`Failed to start tasks: ${response.status} ${response.statusText}`)
   }
-}
-
-/// terminal
-export type SessionStatus =
-  | "CREATED"
-  | "OPEN"
-  | "DISCONNECTED"
-  | "CLOSED";
-
-export interface TerminalSession {
-  sessionId?: string;
-
-  targetType: "SERVER" | "AGENT";
-
-  targetId?: string;
-
-  status?: SessionStatus;
-
-  createdAt?: string; // ISO-8601 UTC string
-}
-
-export async function openTerminalSession(reqs: TerminalSession[]): Promise<TerminalSession[]> {
-  const response = await fetch("/api/admin/terminal/sessions", {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(reqs)
-  })
-
-  if (!response.ok) {
-    throw new Error('failed open terminal session')
-  }
-  const sessions: TerminalSession[] = await response.json()
-  return sessions
 }

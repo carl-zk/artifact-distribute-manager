@@ -1,5 +1,5 @@
 export type TerminalMessage =
-  | { type: 'INPUT'; data: string; sessionId: string }
+  | { type: 'INPUT'; data: string }
   | { type: 'RESIZE'; cols: number; rows: number; sessionId: string }
   | { type: 'CLOSE'; sessionId: string }
   | { type: 'OUTPUT'; data: string; sessionId: string }

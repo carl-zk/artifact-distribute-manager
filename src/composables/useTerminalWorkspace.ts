@@ -1,13 +1,12 @@
 import { computed, ref } from 'vue'
 import { useTerminal } from './useTerminal'
-import type { TerminalSession } from '@/services/clientApi'
 
 export interface TerminalTab {
   id: string
   title: string
   el?: HTMLDivElement | null
   terminal: {
-    open: (req: TerminalSession, el: HTMLDivElement) => Promise<void>
+    open: (el: HTMLDivElement) => Promise<void>
     resize: () => void
     destroy: () => void
     getSessionId: () => string | null
@@ -15,19 +14,23 @@ export interface TerminalTab {
   }
 }
 
+export type TargetType = 'SERVER' | 'AGENT'
+
 export function useTerminalWorkspace() {
   const tabs = ref<TerminalTab[]>([])
   const activeId = ref<string | null>(null)
   const activeTab = computed(() => tabs.value.find(t => t.id === activeId.value))
   let nextTabNo = 0
 
-  async function addTerminal() {
-    const terminal = useTerminal()
+  async function addTerminal(targetType: TargetType, agentId?: string) {
+    const terminal = useTerminal(targetType, agentId)
     const id = crypto.randomUUID()
+    
+    let titlePrefix = agentId === undefined ? 'Server-' : `Agent-${agentId}-`
 
     const tab: TerminalTab = {
       id,
-      title: `Server-${++nextTabNo}`,
+      title: `${titlePrefix}-${++nextTabNo}`,
       terminal
     }
 

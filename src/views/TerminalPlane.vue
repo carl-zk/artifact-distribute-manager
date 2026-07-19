@@ -2,12 +2,35 @@
 import { onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue'
 import { useTerminalWorkspace } from '@/composables/useTerminalWorkspace'
 import 'xterm/css/xterm.css'
+import SelectAgents from '@/components/SelectAgents.vue'
+import { type Agent } from '@/types/Agent'
+import { fetchAgents } from '@/services/clientApi'
 
 const workspace = useTerminalWorkspace()
 
 const broadcastMode = ref(false)
 const selectedTargets = ref<string[]>([])
 const command = ref('')
+
+// agent selection
+const showAgents = ref(false)
+const agents = ref<Agent[]>([])
+const selectedAgents = ref<Agent[]>([])
+
+const onSelectionChange = (selected: Agent[]) => {
+  selectedAgents.value = selected
+}
+
+async function showAgentTable() {
+  showAgents.value = true
+  agents.value = await fetchAgents()
+}
+
+function openAgentTerminal() {
+  showAgents.value = false
+  selectedAgents.value.forEach(agent => workspace.addTerminal('AGENT', agent.agentId))
+  selectedAgents.value = []
+}
 
 function sendBroadcast() {
   workspace.tabs.value.forEach(tab => {
@@ -37,7 +60,7 @@ function setTerminalEl(tabId: any, el: Element | ComponentPublicInstance | null)
     }
 
     if (!tab.terminal.getSessionId()) {
-      tab.terminal.open({ targetType: 'SERVER' }, el)
+      tab.terminal.open(el)
     }
     tab.terminal.resize()
   })
@@ -45,7 +68,7 @@ function setTerminalEl(tabId: any, el: Element | ComponentPublicInstance | null)
 
 onMounted(() => {
   if (workspace.tabs.value.length) return
-  workspace.addTerminal()
+  workspace.addTerminal('SERVER')
 })
 
 onBeforeUnmount(() => {
@@ -77,13 +100,20 @@ watch(
       </li>
 
       <li class="tab-item">
-        <button class="tab-button add-tab" @click="workspace.addTerminal()">+</button>
+        <button class="tab-button add-tab" @click="workspace.addTerminal('SERVER')">+</button>
       </li>
 
       <li class="topbar-spacer">
-        <button class="pin-btn">📌 Pin</button>
+        <button class="pin-btn" @click="showAgentTable()">Agents</button>
       </li>
     </ul>
+
+    <SelectAgents
+      :visible="showAgents"
+      :agents="agents"
+      @close="openAgentTerminal()"
+      @selectionChange="onSelectionChange"
+    />
 
     <!-- TERMINAL AREA -->
     <div class="terminal-area">

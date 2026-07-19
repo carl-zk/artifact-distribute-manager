@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import AgentTable from "@/components/AgentTable.vue";
-import CreateTasksControl from "@/components/CreateTasksControl.vue";
-import FileTable from "@/components/FileTable.vue";
-import SelectAgents from "@/components/SelectAgents.vue";
-import TaskTable from "@/components/TaskTable.vue";
-import { useTaskManagement } from "@/composables/useTaskManagement";
-import { useTaskProgress } from "@/composables/useTaskProgress";
-import { useTaskSelection } from "@/composables/useTaskSelection";
-import { fetchTasks, fetchAgents } from "@/services/clientApi";
+import { onMounted } from 'vue'
+import AgentTable from '@/components/AgentTable.vue'
+import CreateTasksControl from '@/components/CreateTasksControl.vue'
+import FileTable from '@/components/FileTable.vue'
+import SelectAgents from '@/components/SelectAgents.vue'
+import TaskTable from '@/components/TaskTable.vue'
+import { useTaskManagement } from '@/composables/useTaskManagement'
+import { useTaskProgress } from '@/composables/useTaskProgress'
+import { useTaskSelection } from '@/composables/useTaskSelection'
+import { fetchTasks, fetchAgents } from '@/services/clientApi'
 
 // Selection and modal state
 const {
@@ -19,42 +19,38 @@ const {
   openModal,
   closeModal,
   handleAgentSelection,
-  handleFileSelection,
-} = useTaskSelection();
+  handleFileSelection
+} = useTaskSelection()
 
 // Task management
 const { tasks, createdTasksCount, createTasks, startTasks } = useTaskManagement(
   selectedAgents,
-  selectedFiles,
-);
+  selectedFiles
+)
 
 // Task progress tracking
-useTaskProgress(tasks);
+useTaskProgress(tasks)
 
 async function openAgentTable() {
-  openModal("agents");
-  agents.value = await fetchAgents();
+  openModal('agents')
+  agents.value = await fetchAgents()
 }
 
 function openFileTable() {
-  openModal("files");
+  openModal('files')
 }
 
 onMounted(async () => {
-  tasks.value = await fetchTasks();
-});
+  tasks.value = await fetchTasks()
+})
 </script>
 
 <template>
   <div class="task-plane">
     <!-- Selection actions -->
     <div class="selection-actions">
-      <button type="button" class="btn btn-primary" @click="openAgentTable">
-        Select Agents
-      </button>
-      <button type="button" class="btn btn-primary" @click="openFileTable">
-        Select Files
-      </button>
+      <button type="button" class="btn btn-primary" @click="openAgentTable">Select Agents</button>
+      <button type="button" class="btn btn-primary" @click="openFileTable">Select Files</button>
     </div>
 
     <!-- Current selections -->
@@ -71,15 +67,24 @@ onMounted(async () => {
     </div>
 
     <!-- Target directory and task creation -->
-    <CreateTasksControl :selected-agents-count="selectedAgents.length" :selected-files-count="selectedFiles.length"
-      :created-tasks-count="createdTasksCount" @create="createTasks" @start="startTasks" />
+    <CreateTasksControl
+      :selected-agents-count="selectedAgents.length"
+      :selected-files-count="selectedFiles.length"
+      :created-tasks-count="createdTasksCount"
+      @create="createTasks"
+      @start="startTasks"
+    />
 
     <!-- Generated tasks -->
     <TaskTable :tasks="tasks" />
 
     <!-- Agent selection modal -->
-    <SelectAgents :visible="activeModal === 'agents'" :agents="agents" @close="closeModal"
-      @selectionChange="handleAgentSelection" />
+    <SelectAgents
+      :visible="activeModal === 'agents'"
+      :agents="agents"
+      @close="closeModal"
+      @selectionChange="handleAgentSelection"
+    />
 
     <!-- File selection modal -->
     <div v-if="activeModal === 'files'" class="modal-overlay">
