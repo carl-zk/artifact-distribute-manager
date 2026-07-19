@@ -106,7 +106,6 @@ export function useTerminal(targetType: string, agentId?: string) {
   function send(data: string) {
     ws?.send({
       type: 'INPUT',
-      sessionId: sessionId.value!,
       data
     })
   }
