@@ -1,127 +1,64 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch, type ComponentPublicInstance } from 'vue'
 import { useTerminalWorkspace } from '@/composables/useTerminalWorkspace'
 import 'xterm/css/xterm.css'
 import SelectAgents from '@/components/SelectAgents.vue'
-import { type Agent } from '@/types/Agent'
-import { fetchAgents } from '@/services/clientApi'
 
-const workspace = useTerminalWorkspace()
-
-const broadcastMode = ref(false)
-const selectedTargets = ref<string[]>([])
-const command = ref('')
-
-// agent selection
-const showAgents = ref(false)
-const agents = ref<Agent[]>([])
-const selectedAgents = ref<Agent[]>([])
-
-const onSelectionChange = (selected: Agent[]) => {
-  selectedAgents.value = selected
-}
-
-async function showAgentTable() {
-  showAgents.value = true
-  agents.value = await fetchAgents()
-}
-
-function openAgentTerminal() {
-  showAgents.value = false
-  selectedAgents.value.forEach(agent => workspace.addTerminal('AGENT', agent.agentId))
-  selectedAgents.value = []
-}
-
-function sendBroadcast() {
-  workspace.tabs.value.forEach(tab => {
-    if (!selectedTargets.value.includes(tab.id)) return
-
-    tab.terminal.send(`${command.value}\r`)
-  })
-
-  command.value = ''
-}
-
-function setTerminalEl(tabId: any, el: Element | ComponentPublicInstance | null) {
-  if (!tabId || !el || !(el instanceof HTMLDivElement)) return
-
-  const tab = workspace.getTab(tabId)
-
-  if (!tab) return
-
-  tab.el = el
-
-  // delay ensures Vue finished patching + xterm safe mount
-  requestAnimationFrame(() => {
-    // ensure visible before open
-    if (el.offsetWidth === 0 || el.offsetHeight === 0) {
-      // tabs with display = 'none'
-      return
-    }
-
-    if (!tab.terminal.getSessionId()) {
-      tab.terminal.open(el)
-    }
-    tab.terminal.resize()
-  })
-}
-
-onMounted(() => {
-  if (workspace.tabs.value.length) return
-  workspace.addTerminal('SERVER')
-})
-
-onBeforeUnmount(() => {
-  workspace.destroy()
-})
-
-watch(
-  [broadcastMode, () => workspace.tabs.value.length],
-  ([enabled]) => {
-    selectedTargets.value = enabled ? workspace.tabs.value.map(t => t.id) : []
-  },
-  { immediate: true }
-)
+const {
+  tabs,
+  activeId,
+  closeTab,
+  addTerminal,
+  showAgentTable,
+  showAgents,
+  agents,
+  openAgentTerminal,
+  onSelectionChange,
+  setTerminalEl,
+  broadcastMode,
+  selectedTargets,
+  command,
+  sendBroadcast
+} = useTerminalWorkspace()
 </script>
 
 <template>
   <div class="terminal-workspace">
     <!-- TOP BAR -->
     <ul class="topbar">
-      <li v-for="tab in workspace.tabs.value" :key="tab.id" class="tab-item">
+      <li v-for="tab in tabs" :key="tab.id" class="tab-item">
         <button
           class="tab-button"
-          :class="{ active: workspace.activeId.value === tab.id }"
-          @click="workspace.activeId.value = tab.id"
+          :class="{ active: activeId === tab.id }"
+          @click="activeId = tab.id"
         >
           <span class="tab-title">{{ tab.title }}</span>
-          <span class="tab-close" @click.stop="workspace.closeTab(tab.id)">×</span>
+          <span class="tab-close" @click.stop="closeTab(tab.id)">×</span>
         </button>
       </li>
 
       <li class="tab-item">
-        <button class="tab-button add-tab" @click="workspace.addTerminal('SERVER')">+</button>
+        <button class="tab-button add-tab" @click="addTerminal('SERVER')">+</button>
       </li>
 
       <li class="topbar-spacer">
-        <button class="pin-btn" @click="showAgentTable()">Agents</button>
+        <button class="pin-btn" @click="showAgentTable">Agents</button>
       </li>
     </ul>
 
     <SelectAgents
       :visible="showAgents"
       :agents="agents"
-      @close="openAgentTerminal()"
+      @close="openAgentTerminal"
       @selectionChange="onSelectionChange"
     />
 
     <!-- TERMINAL AREA -->
     <div class="terminal-area">
       <div
-        v-for="tab in workspace.tabs.value"
+        v-for="tab in tabs"
         :key="tab.id"
         class="terminal-pane"
-        :style="{ display: workspace.activeId.value === tab.id ? 'block' : 'none' }"
+        :style="{ display: activeId === tab.id ? 'block' : 'none' }"
       >
         <div class="terminal-host">
           <div :ref="el => setTerminalEl(tab.id, el)" class="terminal-node"></div>
@@ -139,7 +76,7 @@ watch(
       <div v-if="broadcastMode" class="broadcast-panel">
         <div class="targets-title">Targets</div>
         <div class="targets">
-          <label v-for="tab in workspace.tabs.value" :key="tab.id" class="checkbox-row">
+          <label v-for="tab in tabs" :key="tab.id" class="checkbox-row">
             <input type="checkbox" :value="tab.id" v-model="selectedTargets" />
             <span>{{ tab.title }} | </span>
           </label>
